@@ -2,12 +2,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using System.Buffers.Text;
 using System.IdentityModel.Tokens.Jwt;
-using System.Runtime.Intrinsics.Arm;
-using System.Security;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -19,12 +15,10 @@ namespace Server.Controllers
     public class OAuthController : Controller
     {
         private readonly IDataProtectionProvider dataProtectionProvider;
-        private readonly DevKeys devKeys;
 
-        public OAuthController(IDataProtectionProvider dataProtectionProvider,DevKeys devKeys)
+        public OAuthController(IDataProtectionProvider dataProtectionProvider)
         {
             this.dataProtectionProvider = dataProtectionProvider;
-            this.devKeys = devKeys;
         }
 
         [HttpGet("/login")]
@@ -131,7 +125,6 @@ namespace Server.Controllers
             var token = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
 
             //var handler = new JsonWebTokenHandler();
-
             //var token = handler.CreateToken(new SecurityTokenDescriptor
             //{
             //    Claims = new Dictionary<string, object>
@@ -148,10 +141,19 @@ namespace Server.Controllers
             return Ok(new
             {
                 access_token = token,
-                token_type="Bearer"
+                token_type = "Bearer",
+                expires_in=DateTime.Now.AddMinutes(15),
+                refresh_token="refresh_token test"
             }) ;
         }
 
+        /// <summary>
+        /// 验证code , exprie 时间, 是否多次使用 , etc...
+        /// </summary>
+        /// <param name="code"></param>
+        /// <param name="verifyer"></param>
+        /// <param name="scope"></param>
+        /// <returns></returns>
         public bool VerifyCode(string code,string verifyer,out string scope)
         {
             var protector = dataProtectionProvider.CreateProtector("oauth");

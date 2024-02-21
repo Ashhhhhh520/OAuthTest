@@ -12,6 +12,7 @@
 
 
 @{ 
+
 	foreach (var item in HttpContext.User.Claims)
 	{
 		<p>@item.Type  :   @item.Value</p>
