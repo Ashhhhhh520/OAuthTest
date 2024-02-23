@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,11 +8,30 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(o =>
     {
-        //o.
+        o.RequireHttpsMetadata = false;
+        o.Authority = "http://localhost:5231";
+        o.Audience = "client";
+        //o.TokenValidationParameters = new TokenValidationParameters
+        //{
+        //    ValidateActor = false,
+        //    ValidateAudience = false,
+        //    ValidateIssuer = false,
+        //    ValidateLifetime = true,
+        //    ClockSkew = new TimeSpan(0, 0, 5),
+        //    ValidateIssuerSigningKey = true,
+        //    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("clientclientclientclientclientclient")),
+        //};
+        o.Events = new JwtBearerEvents
+        {
+            OnMessageReceived =async ctx =>
+            {
+                ctx.Token = ctx.HttpContext.Request.Cookies["access_token"];
+            },
+        };
     });
 
 var app = builder.Build();
@@ -40,7 +61,11 @@ app.MapGet("/weatherforecast", () =>
     return forecast;
 })
 .WithName("GetWeatherForecast")
+.RequireAuthorization()
 .WithOpenApi();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.Run();
 

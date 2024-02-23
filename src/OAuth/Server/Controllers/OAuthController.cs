@@ -99,6 +99,8 @@ namespace Server.Controllers
             var code= query.Get("code");
             var code_verifier = query.Get("code_verifier");
             var clientid = query.Get("client_id");
+            // 密钥
+            var clientsecret = query.Get("client_secret");
 
             if (!VerifyCode(code, code_verifier,out var scope))
             {
@@ -113,13 +115,13 @@ namespace Server.Controllers
                 new Claim("scope",scope)
             };
             // 生成 token
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("secret_key_secret_key_secret_key_secret_key"));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(clientsecret!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var tokenOptions = new JwtSecurityToken(
                 issuer: "avd.oauth",
                 audience: clientid,
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(15),
+                expires: DateTime.Now.AddSeconds(15),
                 signingCredentials: creds
                 );
             var token = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
@@ -142,7 +144,7 @@ namespace Server.Controllers
             {
                 access_token = token,
                 token_type = "Bearer",
-                expires_in=DateTime.Now.AddMinutes(15),
+                expires_in=DateTime.Now.AddSeconds(15),
                 refresh_token="refresh_token test"
             }) ;
         }
