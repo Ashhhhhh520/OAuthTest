@@ -49,18 +49,18 @@ builder.Services.AddAuthentication("oidc")
             OnTokenValidated = ctx =>
             {
                 return Task.CompletedTask;
-            }
-            //OnTokenResponseReceived =  ctx =>
-            //{
-            //    if (ctx.TokenEndpointResponse.AccessToken != null)
-            //        ctx.Response.Cookies.Append("access_token", ctx.TokenEndpointResponse.AccessToken);
-            //    if (ctx.TokenEndpointResponse.RefreshToken != null)
-            //        ctx.Response.Cookies.Append("refresh_token", ctx.TokenEndpointResponse.RefreshToken);
-            //    if (ctx.TokenEndpointResponse.IdToken != null)
-            //        ctx.Response.Cookies.Append("id_token", ctx.TokenEndpointResponse.IdToken);
+            },
+            OnTokenResponseReceived = ctx =>
+            {
+                if (ctx.TokenEndpointResponse.AccessToken != null)
+                    ctx.Response.Cookies.Append("access_token", ctx.TokenEndpointResponse.AccessToken);
+                if (ctx.TokenEndpointResponse.RefreshToken != null)
+                    ctx.Response.Cookies.Append("refresh_token", ctx.TokenEndpointResponse.RefreshToken);
+                if (ctx.TokenEndpointResponse.IdToken != null)
+                    ctx.Response.Cookies.Append("id_token", ctx.TokenEndpointResponse.IdToken);
 
-            //    return Task.CompletedTask;
-            //},
+                return Task.CompletedTask;
+            },
         };
     })
     ;
