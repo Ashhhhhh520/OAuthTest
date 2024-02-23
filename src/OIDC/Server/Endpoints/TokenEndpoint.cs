@@ -36,7 +36,9 @@ namespace Server.Endpoints
 
             // 生成 token
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(clientsecret!));
+            // 算法有限制,HmacSha256 能正常运行
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
             var access_token_options = new JwtSecurityToken(
                 issuer: "avd.oauth",
                 audience: clientid,
@@ -50,7 +52,9 @@ namespace Server.Endpoints
             {
                 new Claim(JwtRegisteredClaimNames.Sub,"123123"),
                 new Claim(JwtRegisteredClaimNames.Name,"ash"),
-                new Claim(JwtRegisteredClaimNames.Iat,DateTime.Now.Ticks.ToString())
+                new Claim(JwtRegisteredClaimNames.Iat,DateTime.Now.Ticks.ToString()),
+                // id token 默认需要验证nonce , Client端可以配置不验证
+                new Claim(JwtRegisteredClaimNames.Nonce,auth.Nonce)
             };
             var id_token_options = new JwtSecurityToken(
                 issuer: "avd.oauth",
@@ -68,7 +72,6 @@ namespace Server.Endpoints
                 expires_in = DateTime.Now.AddSeconds(15),
                 refresh_token = "refresh_token test",
                 id_token=id_token,
-                nonce= auth.Nonce
             });
         }
     }
