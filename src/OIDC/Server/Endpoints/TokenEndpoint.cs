@@ -10,7 +10,7 @@ namespace Server.Endpoints
 {
     public class TokenEndpoint
     {
-        public static async Task<IResult> GetToken(IDataProtectionProvider dataProtectionProvider,HttpContext httpContext)
+        public static async Task<IResult> GetToken(IDataProtectionProvider dataProtectionProvider,HttpContext httpContext,DevKeys devKeys)
         {
             // 验证code 以换取token
 
@@ -19,7 +19,7 @@ namespace Server.Endpoints
             var code = query.Get("code");
             var code_verifier = query.Get("code_verifier");
             var clientid = query.Get("client_id");
-            // 密钥
+            // 客户端密钥 ， 跟token有关系吗？
             var clientsecret = query.Get("client_secret");
 
             if (!dataProtectionProvider.VerifyCode(code, code_verifier, out var auth))
@@ -35,15 +35,15 @@ namespace Server.Endpoints
             var token_handler = new JwtSecurityTokenHandler();
 
             // 生成 token
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(clientsecret!));
+            //var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(clientsecret!));
             // 算法有限制,HmacSha256 能正常运行
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var creds = new SigningCredentials(devKeys.RsaSecurityKey, SecurityAlgorithms.RsaSha256);
 
             var access_token_options = new JwtSecurityToken(
-                issuer: "avd.oauth",
+                issuer: "ash.oauth",
                 audience: clientid,
                 claims: access_token_claims,
-                expires: DateTime.Now.AddSeconds(15),
+                expires: DateTime.Now.AddMinutes(15),
                 signingCredentials: creds
                 );
             var access_token = token_handler.WriteToken(access_token_options);
@@ -57,10 +57,10 @@ namespace Server.Endpoints
                 new Claim(JwtRegisteredClaimNames.Nonce,auth.Nonce)
             };
             var id_token_options = new JwtSecurityToken(
-                issuer: "avd.oauth",
+                issuer: "ash.oauth",
                 audience: clientid,
                 claims: idtoken_claims,
-                expires: DateTime.Now.AddSeconds(15),
+                expires: DateTime.Now.AddMinutes(15),
                 signingCredentials: creds
                 );
 

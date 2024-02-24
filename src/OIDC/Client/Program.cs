@@ -16,6 +16,7 @@ builder.Services.AddAuthentication("oidc")
         o.SignInScheme = "cookie";
         o.RequireHttpsMetadata = false;
         o.ClientId = "client";
+        // 仅发送到idp验证用， 不用于生成token
         o.ClientSecret = "ClientSecretClientSecretClientSecretClientSecret";
 
         o.UsePkce = true;
@@ -23,7 +24,9 @@ builder.Services.AddAuthentication("oidc")
 
         o.CallbackPath = "/oidc/callback";
         o.Authority = "http://localhost:5021";
+        o.ClaimsIssuer = "ash.oauth";
         o.ResponseType = OpenIdConnectResponseType.Code;
+        //o.GetClaimsFromUserInfoEndpoint = true;
 
         o.Scope.Add("openid");
         o.Scope.Add("profile");
@@ -35,30 +38,16 @@ builder.Services.AddAuthentication("oidc")
         //    RequireNonce = false
         //};
 
-        o.TokenValidationParameters = new TokenValidationParameters
-        {
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("ClientSecretClientSecretClientSecretClientSecret")),
-            ValidateIssuerSigningKey=true,
-            ValidIssuer= "avd.oauth",
-            ValidateAudience=false,
-            ValidateLifetime=false,
-        };
-
         o.Events = new Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectEvents
         {
-            OnTokenValidated = ctx =>
-            {
-                return Task.CompletedTask;
-            },
             OnTokenResponseReceived = ctx =>
             {
                 if (ctx.TokenEndpointResponse.AccessToken != null)
                     ctx.Response.Cookies.Append("access_token", ctx.TokenEndpointResponse.AccessToken);
-                if (ctx.TokenEndpointResponse.RefreshToken != null)
-                    ctx.Response.Cookies.Append("refresh_token", ctx.TokenEndpointResponse.RefreshToken);
-                if (ctx.TokenEndpointResponse.IdToken != null)
-                    ctx.Response.Cookies.Append("id_token", ctx.TokenEndpointResponse.IdToken);
-
+                //if (ctx.TokenEndpointResponse.RefreshToken != null)
+                //    ctx.Response.Cookies.Append("refresh_token", ctx.TokenEndpointResponse.RefreshToken);
+                //if (ctx.TokenEndpointResponse.IdToken != null)
+                //    ctx.Response.Cookies.Append("id_token", ctx.TokenEndpointResponse.IdToken);
                 return Task.CompletedTask;
             },
         };

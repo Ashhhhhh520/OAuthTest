@@ -27,7 +27,11 @@
                 httpContext.Request.Query.TryGetValue("state", out var state);
                 httpContext.Request.Query.TryGetValue("nonce", out var nonce);
 
-                // 验证client , response type , scope 是否跟server配置相同
+
+                // 验证client , response type , scope 是否跟server配置相同 
+
+                // 如何验证这个口的 client secret 是否正确， 而不需要到token流程再验证secret？
+
 
             }
             else if(httpContext.Request.Path.Value?.Contains("/oauth/token") ?? false)

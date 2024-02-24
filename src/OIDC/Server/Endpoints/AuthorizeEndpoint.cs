@@ -1,12 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.IdentityModel.Tokens;
-using Server.Extensions;
+﻿using Microsoft.AspNetCore.DataProtection;
 using Server.Models;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using System.Web;
 
 namespace Server.Endpoints
 {

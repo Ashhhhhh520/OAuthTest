@@ -13,13 +13,35 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     {
         o.RequireHttpsMetadata = false;
         o.Authority = "http://localhost:5021";
-        o.Audience = "client";
+        o.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+        };
         o.Events = new JwtBearerEvents
         {
-            OnMessageReceived = async ctx =>
+            OnMessageReceived =  ctx =>
             {
                 ctx.Token = ctx.HttpContext.Request.Cookies["access_token"];
+                return Task.CompletedTask;
             },
+            OnTokenValidated =  ctx =>
+            {
+                // 验证 scope ， 类似 IdentityServer4 的 AddIdentityServerAuthencation 的 ApiName 
+                if ((ctx.Principal?.Identity?.IsAuthenticated ?? false))
+                {
+                    var scope = ctx.Principal.Claims.FirstOrDefault(a => a.Type == "scope")?.Value;
+                    if (!(scope?.Contains("scope1") ?? false))
+                        ctx.Fail(new Exception ("scope is invalid"));
+                }
+                else
+                    ctx.Success();
+                return Task.CompletedTask;
+            },
+            OnAuthenticationFailed = ctx =>
+            {
+                return Task.CompletedTask;
+            }
         };
     });
 
