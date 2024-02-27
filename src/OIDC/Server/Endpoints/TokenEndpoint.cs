@@ -12,67 +12,93 @@ namespace Server.Endpoints
     {
         public static async Task<IResult> GetToken(IDataProtectionProvider dataProtectionProvider,HttpContext httpContext,DevKeys devKeys)
         {
-            // 验证code 以换取token
-
             var body = (await httpContext.Request.BodyReader.ReadAsync()).Buffer;
             var query = HttpUtility.ParseQueryString(Encoding.UTF8.GetString(body));
-            var code = query.Get("code");
-            var code_verifier = query.Get("code_verifier");
+
+            // authorzation_code 和 refresh_token 区分获取token和刷新token
+            var grant_type = query.Get("grant_type");
             var clientid = query.Get("client_id");
-            // 客户端密钥 ， 跟token有关系吗？
+            // 验证客户端密钥 todo:
             var clientsecret = query.Get("client_secret");
 
-            if (!dataProtectionProvider.VerifyCode(code, code_verifier, out var auth))
+
+            if (grant_type == "refresh_token" )
             {
-                return Results.BadRequest("invalid code!");
+                var scope = query.Get("scope");
+                var access_token_claims = new List<Claim>
+                {
+                    new Claim("custom_claim","custom_claim_value"),
+                    new Claim("scope",scope??"")
+                };
+                var access_token = GeneratorToken(devKeys, clientid, access_token_claims, DateTime.Now.AddMinutes(3));
+                return Results.Json(new
+                {
+                    access_token,
+                    token_type = "Bearer",
+                    expires_in = DateTime.Now.AddSeconds(15),
+                    refresh_token = "refresh_token test",
+                });
             }
-
-            var access_token_claims = new List<Claim>
+            else
             {
-                new Claim("custom_claim","custom_claim_value"),
-                new Claim("scope",auth.Scope)
-            };
-            var token_handler = new JwtSecurityTokenHandler();
+                // 验证code 以换取token
+                var code = query.Get("code");
+                var code_verifier = query.Get("code_verifier");
+                if (!dataProtectionProvider.VerifyCode(code, code_verifier, out var auth))
+                {
+                    return Results.BadRequest("invalid code!");
+                }
 
-            // 生成 token
-            //var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(clientsecret!));
-            // 算法有限制,HmacSha256 能正常运行
-            var creds = new SigningCredentials(devKeys.RsaSecurityKey, SecurityAlgorithms.RsaSha256);
+                var access_token_claims = new List<Claim>
+                {
+                    new Claim("custom_claim","custom_claim_value"),
+                    new Claim("scope",auth.Scope)
+                };
+                var access_token = GeneratorToken(devKeys, clientid, access_token_claims, DateTime.Now.AddMinutes(3));
+                var idtoken_claims = new List<Claim>()
+                {
+                    new Claim(JwtRegisteredClaimNames.Sub,"123123"),
+                    new Claim(JwtRegisteredClaimNames.Name,"ash"),
+                    new Claim(JwtRegisteredClaimNames.Iat,DateTime.Now.Ticks.ToString()),
+                    // id token 默认需要验证nonce , Client端可以配置不验证
+                    new Claim(JwtRegisteredClaimNames.Nonce,auth.Nonce)
+                };
+                // id token 会过期吗?
+                var id_token = GeneratorToken(devKeys, clientid, idtoken_claims,DateTime.Now.AddMinutes(3));
+                return Results.Json(new
+                {
+                    access_token = access_token,
+                    token_type = "Bearer",
+                    expires_in = DateTime.Now.AddSeconds(15),
+                    refresh_token = "refresh_token test",
+                    id_token = id_token,
+                });
+            }
+        }
 
-            var access_token_options = new JwtSecurityToken(
-                issuer: "ash.oauth",
-                audience: clientid,
-                claims: access_token_claims,
-                expires: DateTime.Now.AddMinutes(15),
-                signingCredentials: creds
-                );
-            var access_token = token_handler.WriteToken(access_token_options);
 
-            var idtoken_claims = new List<Claim>()
-            {
-                new Claim(JwtRegisteredClaimNames.Sub,"123123"),
-                new Claim(JwtRegisteredClaimNames.Name,"ash"),
-                new Claim(JwtRegisteredClaimNames.Iat,DateTime.Now.Ticks.ToString()),
-                // id token 默认需要验证nonce , Client端可以配置不验证
-                new Claim(JwtRegisteredClaimNames.Nonce,auth.Nonce)
-            };
+        /// <summary>
+        /// 生成 token,算法有限制,HmacSha256 能正常运行
+        /// </summary>
+        /// <param name="devKeys"></param>
+        /// <param name="clientid"></param>
+        /// <param name="claims"></param>
+        /// <param name="exp"></param>
+        /// <returns></returns>
+        static string? GeneratorToken(DevKeys devKeys,string? clientid,List<Claim> claims,DateTime exp)
+        {
+            // var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(clientsecret!));
             var id_token_options = new JwtSecurityToken(
                 issuer: "ash.oauth",
                 audience: clientid,
-                claims: idtoken_claims,
-                expires: DateTime.Now.AddMinutes(15),
-                signingCredentials: creds
+                claims: claims,
+                expires: exp,
+                signingCredentials: devKeys.SigningCredentials
                 );
 
-            var id_token = token_handler.WriteToken(id_token_options);
-            return Results.Json(new
-            {
-                access_token = access_token,
-                token_type = "Bearer",
-                expires_in = DateTime.Now.AddSeconds(15),
-                refresh_token = "refresh_token test",
-                id_token=id_token,
-            });
+            var token = devKeys.Token_handler.WriteToken(id_token_options);
+            return token;
         }
     }
+
 }

@@ -1,5 +1,7 @@
 ﻿using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
+using System.Text.Json;
 
 namespace Server
 {
@@ -8,7 +10,11 @@ namespace Server
         public RSA RsaKey { get; }
 
         public RsaSecurityKey RsaSecurityKey =>new RsaSecurityKey(RsaKey);
+        public SigningCredentials SigningCredentials => new SigningCredentials(RsaSecurityKey, SecurityAlgorithms.RsaSha256);
         public JsonWebKey Jwk;
+        public JwtSecurityTokenHandler Token_handler = new JwtSecurityTokenHandler();
+        public string JwkJson => JsonSerializer.Serialize(new { keys = new List<JsonWebKey> { Jwk } });
+        
         public DevKeys(IWebHostEnvironment webHostEnvironment)
         {
             RsaKey = RSA.Create();
@@ -19,7 +25,7 @@ namespace Server
             }
             RsaKey.ImportRSAPrivateKey(File.ReadAllBytes(path), out _);
             Jwk = JsonWebKeyConverter.ConvertFromRSASecurityKey(RsaSecurityKey);
-            Jwk.Kid = Guid.NewGuid().ToString();
+            Jwk.Kid = "oidc";
         }
 
 
