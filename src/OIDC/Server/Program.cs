@@ -18,6 +18,9 @@ builder.Services.AddAuthentication("cookie")
 /// 系统生成token的私钥
 builder.Services.AddSingleton<DevKeys>();
 
+// cors
+
+
 
 var app = builder.Build();
 
@@ -39,8 +42,6 @@ app.MapGet("/oauth/authorize", AuthorizeEndpoint.Authorize).RequireAuthorization
 
 /// authorize接口结束后，返回client段的 callback path ， 再从token接口获取各个token， 这里要验证请求的code，verifycode， client secret之类的数据
 app.MapPost("/oauth/token", TokenEndpoint.GetToken);
-
-
 
 /// id token 来这里获取用户数据
 app.MapGet("/oauth/userinfo", UserInfoEnpoint.GetUserInfo);

@@ -19,8 +19,8 @@ namespace Server.Endpoints
                 { OidcConstants.Discovery.ClaimsSupported, new string[]{ "sid","email","name" } },
                 { OidcConstants.Discovery.ScopesSupported, new string[]{ "openid","profile","api1","api2","client1","client2" } },
                 { OidcConstants.Discovery.ResponseTypesSupported, new string[]{ "code", "token" ,"id_token" } },
-                {OidcConstants.Discovery.SubjectTypesSupported, new string[]{ "pairwise","public" } },
-                {OidcConstants.Discovery.IdTokenSigningAlgorithmsSupported, new string[]{ "RS256" } }
+                { OidcConstants.Discovery.SubjectTypesSupported, new string[]{ "pairwise","public" } },
+                { OidcConstants.Discovery.IdTokenSigningAlgorithmsSupported, new string[]{ "RS256" } }
 
             };
 
