@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc.TagHelpers.Cache;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
@@ -37,19 +38,29 @@ builder.Services.AddAuthentication("oidc")
         {
             OnTokenResponseReceived = ctx =>
             {
-                ctx.Response.Headers["Authorize"] = ctx.TokenEndpointResponse.AccessToken;
-                ctx.Response.Headers["Refresh_Token"] = ctx.TokenEndpointResponse.RefreshToken;
-                //if (ctx.TokenEndpointResponse.AccessToken != null)
-                //    ctx.Response.Cookies.Append("access_token", ctx.TokenEndpointResponse.AccessToken);
-                //if (ctx.TokenEndpointResponse.RefreshToken != null)
-                //    ctx.Response.Cookies.Append("refresh_token", ctx.TokenEndpointResponse.RefreshToken);
-                //if (ctx.TokenEndpointResponse.IdToken != null)
-                //    ctx.Response.Cookies.Append("id_token", ctx.TokenEndpointResponse.IdToken);
+                if (ctx.TokenEndpointResponse.AccessToken != null)
+                    ctx.Response.Cookies.Append("access_token", ctx.TokenEndpointResponse.AccessToken);
                 return Task.CompletedTask;
             },
+            OnAuthenticationFailed = ctx =>
+            {
+
+                return Task.CompletedTask;
+            },
+            OnAccessDenied = ctx =>
+            {
+
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = ctx =>
+            {
+
+                return Task.CompletedTask;
+            }
         };
     })
     ;
+
 
 var app = builder.Build();
 

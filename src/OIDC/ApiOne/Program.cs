@@ -1,4 +1,7 @@
+using ApiOne;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,10 +43,37 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             },
             OnAuthenticationFailed = ctx =>
             {
+                // SecurityTokenExpiredException
+                var ifexpired = ctx.Exception is SecurityTokenExpiredException;
+                if(ifexpired)
+                {
+
+                    var identity = new ClaimsIdentity
+                    {
+                        
+                    };
+
+                    ctx.Principal = new System.Security.Claims.ClaimsPrincipal(identity);
+                    ctx.Success();
+                }
+                
+
+                return Task.CompletedTask;
+            },
+            OnForbidden = ctx =>
+            {
+
+                return Task.CompletedTask;
+            },
+            OnChallenge = ctx =>
+            {
+
                 return Task.CompletedTask;
             }
         };
     });
+
+builder.Services.AddSingleton<TestModel>();
 
 var app = builder.Build();
 
@@ -59,7 +89,7 @@ var summaries = new[]
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
 
-app.MapGet("/weatherforecast", () =>
+app.MapGet("/weatherforecast", (HttpContext context) =>
 {
     var forecast = Enumerable.Range(1, 5).Select(index =>
         new WeatherForecast
@@ -69,6 +99,7 @@ app.MapGet("/weatherforecast", () =>
             summaries[Random.Shared.Next(summaries.Length)]
         ))
         .ToArray();
+    context.Response.Cookies.Append("six", Guid.NewGuid().ToString());
     return forecast;
 })
 .WithName("GetWeatherForecast")
