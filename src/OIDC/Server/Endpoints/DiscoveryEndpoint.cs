@@ -1,6 +1,4 @@
 ﻿
-using IdentityModel;
-
 namespace Server.Endpoints
 {
     public class DiscoveryEndpoint
