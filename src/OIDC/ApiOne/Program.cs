@@ -1,6 +1,7 @@
 using ApiOne;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using System;
 using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,7 +17,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     {
         o.RequireHttpsMetadata = false;
         o.Authority = "http://localhost:5021";
-        o.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        o.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = false,
             ValidateAudience = false,
@@ -47,27 +48,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 var ifexpired = ctx.Exception is SecurityTokenExpiredException;
                 if(ifexpired)
                 {
-
-                    var identity = new ClaimsIdentity
-                    {
-                        
-                    };
-
-                    ctx.Principal = new System.Security.Claims.ClaimsPrincipal(identity);
-                    ctx.Success();
+                    ctx.Response.Headers.TryAdd("Token-Expired", "true");
+                    //// 获取新的token 
+                    
+                    //ClaimsIdentity claims = new ClaimsIdentity(new Claim[] {
+                    //    new Claim(ClaimTypes.Sid, "id"),
+                    //    new Claim(ClaimTypes.Name, "name")
+                    //}, "Bearer");
+                    //ctx.Principal = new ClaimsPrincipal(new ClaimsIdentity[] { claims });
+                    //ctx.Success();
                 }
-                
-
-                return Task.CompletedTask;
-            },
-            OnForbidden = ctx =>
-            {
-
-                return Task.CompletedTask;
-            },
-            OnChallenge = ctx =>
-            {
-
                 return Task.CompletedTask;
             }
         };

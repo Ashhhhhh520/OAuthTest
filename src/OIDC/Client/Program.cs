@@ -39,7 +39,11 @@ builder.Services.AddAuthentication("oidc")
             OnTokenResponseReceived = ctx =>
             {
                 if (ctx.TokenEndpointResponse.AccessToken != null)
+                {
                     ctx.Response.Cookies.Append("access_token", ctx.TokenEndpointResponse.AccessToken);
+                    ctx.Response.Headers.Remove("Authorize");
+                    ctx.Response.Headers.Append("Authorize", ctx.TokenEndpointResponse.AccessToken);
+                }
                 return Task.CompletedTask;
             },
             OnAuthenticationFailed = ctx =>
