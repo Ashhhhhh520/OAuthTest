@@ -44,19 +44,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             },
             OnAuthenticationFailed = ctx =>
             {
-                // SecurityTokenExpiredException
                 var ifexpired = ctx.Exception is SecurityTokenExpiredException;
                 if(ifexpired)
                 {
+                    // 标记token 过期, 让客户端去刷新token
                     ctx.Response.Headers.TryAdd("Token-Expired", "true");
-                    //// 获取新的token 
-                    
-                    //ClaimsIdentity claims = new ClaimsIdentity(new Claim[] {
-                    //    new Claim(ClaimTypes.Sid, "id"),
-                    //    new Claim(ClaimTypes.Name, "name")
-                    //}, "Bearer");
-                    //ctx.Principal = new ClaimsPrincipal(new ClaimsIdentity[] { claims });
-                    //ctx.Success();
                 }
                 return Task.CompletedTask;
             }

@@ -21,8 +21,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Client", "src\OIDC\Client\C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiOne", "src\OIDC\ApiOne\ApiOne.csproj", "{2A48A226-B67E-4BE7-BBBF-17534117773A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client_Introspection", "src\OIDC\Client_Introspection\Client_Introspection.csproj", "{7D838A1D-7BCA-4C53-82FF-5A7A9FA8AD27}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,10 +51,6 @@ Global
 		{2A48A226-B67E-4BE7-BBBF-17534117773A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2A48A226-B67E-4BE7-BBBF-17534117773A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2A48A226-B67E-4BE7-BBBF-17534117773A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7D838A1D-7BCA-4C53-82FF-5A7A9FA8AD27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7D838A1D-7BCA-4C53-82FF-5A7A9FA8AD27}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7D838A1D-7BCA-4C53-82FF-5A7A9FA8AD27}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7D838A1D-7BCA-4C53-82FF-5A7A9FA8AD27}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -70,7 +64,6 @@ Global
 		{2ABA8C4F-0C7E-4C8E-B77C-597FB8214E71} = {EB1E27BA-1FE8-4F34-999D-4CF6F987673C}
 		{CDCB6FA0-0F62-4080-8511-9B3A7D3EB8E0} = {EB1E27BA-1FE8-4F34-999D-4CF6F987673C}
 		{2A48A226-B67E-4BE7-BBBF-17534117773A} = {EB1E27BA-1FE8-4F34-999D-4CF6F987673C}
-		{7D838A1D-7BCA-4C53-82FF-5A7A9FA8AD27} = {EB1E27BA-1FE8-4F34-999D-4CF6F987673C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {91ABD121-0659-4A97-AE19-0324D076AC9C}
