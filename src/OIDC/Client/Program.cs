@@ -41,8 +41,14 @@ builder.Services.AddAuthentication("oidc")
                 if (ctx.TokenEndpointResponse.AccessToken != null)
                 {
                     ctx.Response.Cookies.Append("access_token", ctx.TokenEndpointResponse.AccessToken);
-                    ctx.Response.Headers.Remove("Authorize");
-                    ctx.Response.Headers.Append("Authorize", ctx.TokenEndpointResponse.AccessToken);
+                }
+                if(ctx.TokenEndpointResponse.IdToken != null)
+                {
+                    ctx.Response.Cookies.Append("id_token", ctx.TokenEndpointResponse.IdToken);
+                }
+                if(ctx.TokenEndpointResponse.RefreshToken != null)
+                {
+                    ctx.Response.Cookies.Append("refresh_token", ctx.TokenEndpointResponse.RefreshToken);
                 }
                 return Task.CompletedTask;
             },
