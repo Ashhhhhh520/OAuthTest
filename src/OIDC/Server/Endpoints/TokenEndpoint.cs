@@ -18,7 +18,7 @@ namespace Server.Endpoints
             // authorzation_code 和 refresh_token 区分获取token和刷新token
             var grant_type = query.Get("grant_type");
             var clientid = query.Get("client_id");
-            // 验证客户端密钥 todo:
+            // 与客户端配置对比，验证客户端密钥，密钥不参与token生成 todo:
             var clientsecret = query.Get("client_secret");
 
 

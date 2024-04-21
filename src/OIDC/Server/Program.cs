@@ -9,6 +9,7 @@ builder.Services.AddControllersWithViews();
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
 
+// Oauth2.0 客户端自己用cookie验证
 builder.Services.AddAuthentication("cookie")
     .AddCookie("cookie", o =>
     {
