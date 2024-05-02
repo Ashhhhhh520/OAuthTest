@@ -8,6 +8,7 @@ builder.Services.AddRazorPages();
 
 builder.Services.AddAuthentication("custom")
     .AddCookie("cookie")
+    // OAuth 验证也只是适合单体项目
     .AddOAuth("custom", o =>
     {
         o.SignInScheme = "cookie";

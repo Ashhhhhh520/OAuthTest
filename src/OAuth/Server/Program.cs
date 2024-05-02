@@ -23,7 +23,7 @@ if (!app.Environment.IsDevelopment())
     //app.UseHsts();
 }
 
-/// 验证jwt 会来此接口获取oidc文档
+/// jwtbearer 会来此接口获取oidc文档,参考OIDC Server项目设置发现文档
 app.MapGet(".well-known/openid-configuration", (HttpContext context) =>
 {
     return Results.Content("6");

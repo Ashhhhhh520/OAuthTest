@@ -1,3 +1,4 @@
+using Client;
 using Microsoft.AspNetCore.Mvc.TagHelpers.Cache;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -10,66 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 
-builder.Services.AddAuthentication("oidc")
-    .AddCookie("cookie")
-    .AddOpenIdConnect("oidc", o =>
-    {
-        o.SignInScheme = "cookie";
-        o.RequireHttpsMetadata = false;
-        o.ClientId = "client";
-        // 仅发送到idp验证用， 不用于生成token
-        o.ClientSecret = "ClientSecretClientSecretClientSecretClientSecret";
-
-        o.UsePkce = true;
-        o.SaveTokens = true;
-
-        o.CallbackPath = "/oidc/callback";
-        o.Authority = "http://localhost:5021";
-        o.ClaimsIssuer = "ash.oauth";
-        o.ResponseType = OpenIdConnectResponseType.Code;
-        //o.GetClaimsFromUserInfoEndpoint = true;
-
-        o.Scope.Add("openid");
-        o.Scope.Add("profile");
-        o.Scope.Add("scope1");
-        o.Scope.Add("offline_access");
-
-        o.Events = new Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectEvents
-        {
-            OnTokenResponseReceived = ctx =>
-            {
-                if (ctx.TokenEndpointResponse.AccessToken != null)
-                {
-                    ctx.Response.Cookies.Append("access_token", ctx.TokenEndpointResponse.AccessToken);
-                }
-                if(ctx.TokenEndpointResponse.IdToken != null)
-                {
-                    ctx.Response.Cookies.Append("id_token", ctx.TokenEndpointResponse.IdToken);
-                }
-                if(ctx.TokenEndpointResponse.RefreshToken != null)
-                {
-                    ctx.Response.Cookies.Append("refresh_token", ctx.TokenEndpointResponse.RefreshToken);
-                }
-                return Task.CompletedTask;
-            },
-            OnAuthenticationFailed = ctx =>
-            {
-
-                return Task.CompletedTask;
-            },
-            OnAccessDenied = ctx =>
-            {
-
-                return Task.CompletedTask;
-            },
-            OnTokenValidated = ctx =>
-            {
-
-                return Task.CompletedTask;
-            }
-        };
-    })
-    ;
+//builder.Services.AddJwtAuth();
+builder.Services.AddOpenIDAuth();
 
 
 var app = builder.Build();

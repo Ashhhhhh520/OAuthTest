@@ -13,6 +13,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAuthorization();
 
 // api 项目通过Authority配置，从DiscoveryEndpoint获取配置，包括token验证公钥，api端自行验证token， 权限，scope等
+// 前后端分离系统，前端自行处理refresh token 1：定时刷新token 2：401时再刷新token
+// 后端api只接入server做验证
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(o =>
     {
@@ -27,6 +30,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             OnMessageReceived =  ctx =>
             {
+                // 从Authorize ， Cookies ， Url 3个其中之一获取access token
                 ctx.Token = ctx.HttpContext.Request.Cookies["access_token"];
                 return Task.CompletedTask;
             },
@@ -41,16 +45,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 }
                 else
                     ctx.Success();
-                return Task.CompletedTask;
-            },
-            OnAuthenticationFailed = ctx =>
-            {
-                var ifexpired = ctx.Exception is SecurityTokenExpiredException;
-                if(ifexpired)
-                {
-                    // 标记token 过期, 让客户端去刷新token
-                    ctx.Response.Headers.TryAdd("Token-Expired", "true");
-                }
                 return Task.CompletedTask;
             }
         };
