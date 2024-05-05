@@ -30,7 +30,11 @@ namespace Client
                 o.CallbackPath = "/oidc/callback";
                 o.Authority = "http://localhost:5021";
                 o.ClaimsIssuer = "ash.oauth";
-                o.ResponseType = OpenIdConnectResponseType.Code;
+
+                // Response Type 包含 code，client端需要生成code_challenge并发送到server，server端加密code_challenge&其他数据，生成code_verifier然后返回给client端，
+                // client端请求Token流程会携带code_challenge和code_verifier参数，server端需要验证两个参数
+                // code ResponseType有code_challenge，code_challenge
+                //o.ResponseType = OpenIdConnectResponseType.Code;
                 //o.GetClaimsFromUserInfoEndpoint = true;
 
                 o.Scope.Add("openid");

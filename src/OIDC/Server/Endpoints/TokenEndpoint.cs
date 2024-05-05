@@ -21,7 +21,6 @@ namespace Server.Endpoints
             // 与客户端配置对比，验证客户端密钥，密钥不参与token生成 todo:
             var clientsecret = query.Get("client_secret");
 
-
             if (grant_type == "refresh_token" )
             {
                 var scope = query.Get("scope");
@@ -39,7 +38,7 @@ namespace Server.Endpoints
                     refresh_token = "refresh_token test",
                 });
             }
-            else
+            else if(grant_type =="code")
             {
                 // 验证code 以换取token
                 var code = query.Get("code");
@@ -72,6 +71,17 @@ namespace Server.Endpoints
                     expires_in = DateTime.Now.AddSeconds(15),
                     refresh_token = "refresh_token test",
                     id_token = id_token,
+                });
+            }
+            else
+            {
+                var access_token_claims = new List<Claim> { };
+                var access_token = GeneratorToken(devKeys, clientid, access_token_claims, DateTime.Now.AddMinutes(3));
+                return Results.Json(new
+                {
+                    access_token = access_token,
+                    token_type = "Bearer",
+                    expires_in = DateTime.Now.AddSeconds(15),
                 });
             }
         }

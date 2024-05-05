@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.DataProtection;
 using Server.Models;
+using System.Text;
 
 namespace Server.Endpoints
 {
@@ -9,34 +10,54 @@ namespace Server.Endpoints
         {
             // 验证
             httpContext.Request.Query.TryGetValue("response_type", out var response_type);
+
+            // code => authorization code flow
+            // id_token / token => implicit flow
+            // code & (id_token / token) => hybrid flow
+
             httpContext.Request.Query.TryGetValue("client_id", out var client_id);
-            httpContext.Request.Query.TryGetValue("code_challenge", out var code_challenge);
-            httpContext.Request.Query.TryGetValue("code_challenge_method", out var code_challenge_method);
             httpContext.Request.Query.TryGetValue("redirect_uri", out var redirect_uri);
             httpContext.Request.Query.TryGetValue("scope", out var scope);
             httpContext.Request.Query.TryGetValue("state", out var state);
             httpContext.Request.Query.TryGetValue("nonce", out var nonce);
 
-            // 验证scope 等一系列操作
+            // 验证scope 等一系列操作 todo:
 
-            // code 只使用一次,黑白名单处理重复code
-            var auth = new AuthCodeModel
+
+            if (response_type.Contains("code"))
             {
-                ClientID = client_id,
-                CodeChallenge = code_challenge,
-                //RedirectUri = redirect_uri,
-                //CodeChallengeMethod = code_challenge_method,
-                Expriy = DateTime.Now.AddSeconds(15),
-                Scope = scope,
-                Nonce=nonce
-            };
+                httpContext.Request.Query.TryGetValue("code_challenge", out var code_challenge);
+                httpContext.Request.Query.TryGetValue("code_challenge_method", out var code_challenge_method);
+                // code 只使用一次,黑白名单处理重复code
+                var auth = new AuthCodeModel
+                {
+                    ClientID = client_id,
+                    CodeChallenge = code_challenge,
+                    //RedirectUri = redirect_uri,
+                    //CodeChallengeMethod = code_challenge_method,
+                    Expriy = DateTime.Now.AddSeconds(15),
+                    Scope = scope,
+                    Nonce = nonce
+                };
 
-            var protection = dataProtectionProvider.CreateProtector("oauth");
-            // 生成code 并返回给client
-            var code = protection.Protect(System.Text.Json.JsonSerializer.Serialize(auth));
+                var protection = dataProtectionProvider.CreateProtector("oauth");
+                // 生成code 并返回给client
+                var code = protection.Protect(System.Text.Json.JsonSerializer.Serialize(auth));
+                // code 由server生成 , state 由client生成
+                return Results.Redirect($"{redirect_uri}?code={code}&state={state}");
+            }
+            else
+            {
+                httpContext.Response.ContentType = "application/x-www-form-urlencoded";
 
-            // code 由server生成 , state 由client生成
-            return Results.Redirect($"{redirect_uri}?code={code}&state={state}");
+                var uri =new StringBuilder($"{redirect_uri}?state={state}");
+                if (response_type.Contains("id_token"))
+                    uri.Append($"&id_token=test_idtokentest_idtokentest_idtokentest_idtoken");
+                if (response_type.Contains("token"))
+                    uri.Append($"&token=test_tokentest_tokentest_tokentest_tokentest_token");
+                return Results.Redirect(uri.ToString());
+            }
+
         }
 
 

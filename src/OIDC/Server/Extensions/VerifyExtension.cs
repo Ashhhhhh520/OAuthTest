@@ -23,9 +23,7 @@ namespace Server.Extensions
             var sha256 = SHA256.HashData(Encoding.ASCII.GetBytes(verifyer));
 
             var verfiy = Base64UrlTextEncoder.Encode(sha256);
-
             authcode = auth;
-
             return verfiy == auth?.CodeChallenge;
         }
     }
