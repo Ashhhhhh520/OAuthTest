@@ -54,14 +54,19 @@ namespace Server.Endpoints
                     new Claim("scope",auth.Scope)
                 };
                 var access_token = GeneratorToken(devKeys, clientid, access_token_claims, DateTime.Now.AddMinutes(3));
+
                 var idtoken_claims = new List<Claim>()
                 {
                     new Claim(JwtRegisteredClaimNames.Sub,"123123"),
                     new Claim(JwtRegisteredClaimNames.Name,"ash"),
                     new Claim(JwtRegisteredClaimNames.Iat,DateTime.Now.Ticks.ToString()),
-                    // id token 默认需要验证nonce , Client端可以配置不验证
-                    new Claim(JwtRegisteredClaimNames.Nonce,auth.Nonce)
                 };
+
+                // client 端没发送nonce就不需要添加
+                // id token 默认需要验证nonce , client端可以配置不验证
+                if (!string.IsNullOrEmpty(auth.Nonce))
+                    idtoken_claims.Add(new Claim(JwtRegisteredClaimNames.Nonce, auth.Nonce));
+
                 // id token 会过期吗?
                 var id_token = GeneratorToken(devKeys, clientid, idtoken_claims,DateTime.Now.AddMinutes(3));
                 return Results.Json(new
@@ -95,7 +100,7 @@ namespace Server.Endpoints
         /// <param name="claims"></param>
         /// <param name="exp"></param>
         /// <returns></returns>
-        static string? GeneratorToken(DevKeys devKeys,string? clientid,List<Claim> claims,DateTime exp)
+        public static string? GeneratorToken(DevKeys devKeys,string? clientid,List<Claim> claims,DateTime exp)
         {
             // var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(clientsecret!));
             var id_token_options = new JwtSecurityToken(

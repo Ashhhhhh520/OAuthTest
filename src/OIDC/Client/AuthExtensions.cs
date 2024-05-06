@@ -21,7 +21,7 @@ namespace Client
                 o.SignInScheme = "cookie";
                 o.RequireHttpsMetadata = false;
                 o.ClientId = "client";
-                // 仅发送到idp验证用， 不用于生成token
+                // 仅发送到idp验证用
                 o.ClientSecret = "ClientSecretClientSecretClientSecretClientSecret";
 
                 o.UsePkce = true;
@@ -34,8 +34,14 @@ namespace Client
                 // Response Type 包含 code，client端需要生成code_challenge并发送到server，server端加密code_challenge&其他数据，生成code_verifier然后返回给client端，
                 // client端请求Token流程会携带code_challenge和code_verifier参数，server端需要验证两个参数
                 // code ResponseType有code_challenge，code_challenge
-                //o.ResponseType = OpenIdConnectResponseType.Code;
+                o.ResponseType = OpenIdConnectResponseType.IdTokenToken;
                 //o.GetClaimsFromUserInfoEndpoint = true;
+
+                //o.ResponseMode = "query";
+
+                // 设置需要验证的 openid connect 协议数据
+                // RequireNonce=false ， 就不会生成nonce发送到server端
+                //o.ProtocolValidator = new OpenIdConnectProtocolValidator { RequireNonce = false,RequireSub=true };
 
                 o.Scope.Add("openid");
                 o.Scope.Add("profile");
@@ -46,88 +52,14 @@ namespace Client
                 {
                     OnMessageReceived = ctx =>
                     {
-
                         return Task.CompletedTask;
                     },
                     OnTokenResponseReceived = ctx =>
                     {
-                        //if (ctx.TokenEndpointResponse.AccessToken != null)
-                        //{
-                        //    ctx.Response.Cookies.Append("access_token", ctx.TokenEndpointResponse.AccessToken);
-                        //}
-                        //if (ctx.TokenEndpointResponse.IdToken != null)
-                        //{
-                        //    ctx.Response.Cookies.Append("id_token", ctx.TokenEndpointResponse.IdToken);
-                        //}
-                        //if (ctx.TokenEndpointResponse.RefreshToken != null)
-                        //{
-                        //    ctx.Response.Cookies.Append("refresh_token", ctx.TokenEndpointResponse.RefreshToken);
-                        //}
                         return Task.CompletedTask;
                     },
                 };
             });
-        }
-
-        public static void AddJwtAuth(this IServiceCollection services)
-        {
-            // api 项目通过Authority配置，从DiscoveryEndpoint获取配置，包括token验证公钥，api端自行验证token， 权限，scope等
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(o =>
-                {
-                    o.RequireHttpsMetadata = false;
-                    o.Authority = "http://localhost:5021";
-                    o.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = false,
-                        ValidateAudience = false,
-                    };
-                    o.Events = new JwtBearerEvents
-                    {
-                        OnMessageReceived = ctx =>
-                        {
-                            ctx.Token = ctx.HttpContext.Request.Cookies["access_token"];
-                            return Task.CompletedTask;
-                        },
-                        OnTokenValidated = ctx =>
-                        {
-                            if(!ctx.HttpContext?.User?.Identity?.IsAuthenticated ?? false)
-                            {
-                                ctx.Fail(new LoginException());
-                                return Task.CompletedTask;
-                            }
-
-                            // 验证 scope ， 类似 IdentityServer4 的 AddIdentityServerAuthencation 的 ApiName 
-                            if ((ctx.Principal?.Identity?.IsAuthenticated ?? false))
-                            {
-                                var scope = ctx.Principal.Claims.FirstOrDefault(a => a.Type == "scope")?.Value;
-                                if (!(scope?.Contains("scope1") ?? false))
-                                    ctx.Fail(new Exception("scope is invalid"));
-                            }
-                            else
-                                ctx.Success();
-                            return Task.CompletedTask;
-                        },
-                        OnAuthenticationFailed = ctx =>
-                        {
-                            ctx.Response.Redirect("http://localhost:5021/oauth/authorize");
-                            return Task.CompletedTask;
-                            //if(ctx.Exception is LoginException)
-                            //{
-                            //    ctx.Response.Redirect("http://localhost:5021/oauth/authorize");
-                            //    return Task.CompletedTask;
-                            //}
-
-                            //var ifexpired = ctx.Exception is SecurityTokenExpiredException;
-                            //if (ifexpired)
-                            //{
-                            //    // 标记token 过期, 让客户端去刷新token
-                            //    ctx.Response.Headers.TryAdd("Token-Expired", "true");
-                            //}
-                            //return Task.CompletedTask;
-                        }
-                    };
-                });
         }
     }
 }

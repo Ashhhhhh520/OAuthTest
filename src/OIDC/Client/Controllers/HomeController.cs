@@ -1,4 +1,5 @@
 using Client.Models;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -21,11 +22,14 @@ namespace Client.Controllers
         }
 
         [Authorize]
-        public IActionResult Privacy()
+        public async Task<IActionResult> Privacy()
         {
+            var id_token =await HttpContext.GetTokenAsync("id_token");
+            System.Diagnostics.Debug.WriteLine($"id_token:{id_token}");
+            var access_token =await HttpContext.GetTokenAsync("access_token");
+            System.Diagnostics.Debug.WriteLine($"token:{access_token}");
             foreach (var item in HttpContext.User.Claims)
             {
-
                 System.Diagnostics.Debug.WriteLine($"{item.Type} : {item.Value}");
             }
             return View();
