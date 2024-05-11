@@ -1,8 +1,15 @@
 ﻿
+using IdentityModel;
+
 namespace Server.Endpoints
 {
     public class DiscoveryEndpoint
     {
+        private static readonly string[] responsetypes = ["code", "token", "id_token"];
+        private static readonly string[] claims = ["sid","email","name"];
+        private static readonly string[] scopes = ["openid", "profile", "api1", "api2", "client1", "client2"];
+        private static readonly string[] subjects = ["pairwise","public"];
+        private static readonly string[] algorithms = ["RS256"];
 
         public static IResult GetDiscoveryDoc(HttpContext httpContext)
         {
@@ -16,11 +23,11 @@ namespace Server.Endpoints
                 { OidcConstants.Discovery.DiscoveryEndpoint, "http://localhost:5021/.well-known/openid-configuration" },
                 { OidcConstants.Discovery.JwksUri, "http://localhost:5021/oauth/jwks" },
 
-                { OidcConstants.Discovery.ClaimsSupported, new string[]{ "sid","email","name" } },
-                { OidcConstants.Discovery.ScopesSupported, new string[]{ "openid","profile","api1","api2","client1","client2" } },
-                { OidcConstants.Discovery.ResponseTypesSupported, new string[]{ "code", "token" ,"id_token" } },
-                { OidcConstants.Discovery.SubjectTypesSupported, new string[]{ "pairwise","public" } },
-                { OidcConstants.Discovery.IdTokenSigningAlgorithmsSupported, new string[]{ "RS256" } }
+                { OidcConstants.Discovery.ClaimsSupported, claims },
+                { OidcConstants.Discovery.ScopesSupported, scopes },
+                { OidcConstants.Discovery.ResponseTypesSupported, responsetypes },
+                { OidcConstants.Discovery.SubjectTypesSupported, subjects },
+                { OidcConstants.Discovery.IdTokenSigningAlgorithmsSupported, algorithms }
 
             };
 

@@ -100,7 +100,7 @@ namespace Server.Endpoints
         /// <param name="claims"></param>
         /// <param name="exp"></param>
         /// <returns></returns>
-        public static string? GeneratorToken(DevKeys devKeys,string? clientid,List<Claim> claims,DateTime exp)
+        public static string? GeneratorToken(DevKeys devKeys,string? clientid,List<Claim>? claims,DateTime exp)
         {
             // var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(clientsecret!));
             var id_token_options = new JwtSecurityToken(

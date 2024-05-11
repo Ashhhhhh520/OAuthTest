@@ -37,7 +37,7 @@ namespace Client
                 o.ResponseType = OpenIdConnectResponseType.IdTokenToken;
                 //o.GetClaimsFromUserInfoEndpoint = true;
 
-                //o.ResponseMode = "query";
+                //o.ResponseMode = OpenIdConnectResponseMode.Query;
 
                 // 设置需要验证的 openid connect 协议数据
                 // RequireNonce=false ， 就不会生成nonce发送到server端
