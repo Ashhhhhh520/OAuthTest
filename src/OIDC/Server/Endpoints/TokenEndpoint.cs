@@ -26,8 +26,8 @@ namespace Server.Endpoints
                 var scope = query.Get("scope");
                 var access_token_claims = new List<Claim>
                 {
-                    new Claim("custom_claim","custom_claim_value"),
-                    new Claim("scope",scope??"")
+                    new ("custom_claim","custom_claim_value"),
+                    new ("scope",scope??"")
                 };
                 var access_token = GeneratorToken(devKeys, clientid, access_token_claims, DateTime.Now.AddMinutes(3));
                 return Results.Json(new
@@ -38,7 +38,7 @@ namespace Server.Endpoints
                     refresh_token = "refresh_token test",
                 });
             }
-            else if(grant_type =="code")
+            else if(grant_type == "authorization_code")
             {
                 // 验证code 以换取token
                 var code = query.Get("code");
@@ -80,6 +80,10 @@ namespace Server.Endpoints
             }
             else
             {
+                // 正常不会走到这个分支 ,  implicit 流程在Authorize中就完成token输出
+                // authorization_code 流程会在上面的分支获取token
+                // refresh_token 会在第一个分支获取token
+
                 var access_token_claims = new List<Claim> { };
                 var access_token = GeneratorToken(devKeys, clientid, access_token_claims, DateTime.Now.AddMinutes(3));
                 return Results.Json(new

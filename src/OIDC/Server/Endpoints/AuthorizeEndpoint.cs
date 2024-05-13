@@ -227,13 +227,13 @@ namespace Server.Endpoints
             httpContext.Request.Query.TryGetValue(AuthorizeRequest.ClientId, out var client_id);
             httpContext.Request.Query.TryGetValue(AuthorizeRequest.Scope, out var scope);
 
-
             // 根据scope 获取用户信息： 类似 ApiResource TODO：
             var claims = new List<Claim>
             {
-                new (JwtRegisteredClaimNames.Sub,"myuserid"),
+                new (JwtRegisteredClaimNames.Sub,"my access token sub id"),
                 new (StandardScopes.OpenId,"openid"),
             };
+
             return claims;
         }
 
@@ -245,13 +245,14 @@ namespace Server.Endpoints
             // 根据scope 获取用户信息： 类似 IdentityResource TODO：
             var claims = new List<Claim>(5)
             {
-                new(JwtRegisteredClaimNames.Iat,DateTime.Now.ToString()),
-                new(JwtRegisteredClaimNames.Sub,"my sub id")
+                new(JwtRegisteredClaimNames.Iat,DateTime.Now.Ticks.ToString()),
+                new(JwtRegisteredClaimNames.Sub,"my id token sub id")
             };
 
             // client 端没发送nonce就不需要添加
             if (!string.IsNullOrEmpty(nonce))
                 claims.Add(new Claim(JwtRegisteredClaimNames.Nonce, nonce!));
+
 
             return claims;
         }
@@ -307,7 +308,7 @@ namespace Server.Endpoints
             }
             else
             {
-                var parameter = inputs.SelectMany(a => string.Format(parameter_format, a.Key, a.Value));
+                var parameter = string.Join(' ', inputs.Select(a => string.Format(parameter_format, a.Key, a.Value)));
 
                 var body = string.Format(FORM_POST_FORMAT, redirect_uri, state, parameter);
                 return Results.Content(body, "text/html");
